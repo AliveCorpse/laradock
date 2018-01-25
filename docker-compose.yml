@@ -512,6 +512,7 @@ services:
         - elasticsearch-plugins:/usr/share/elasticsearch/plugins
       environment:
         - cluster.name=laradock-cluster
+        - xpack.security.enabled=false
         - bootstrap.memory_lock=true
         - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       ulimits:
