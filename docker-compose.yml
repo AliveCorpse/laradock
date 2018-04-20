@@ -285,6 +285,7 @@ services:
       volumes:
         - ${DATA_SAVE_PATH}/mariadb:/var/lib/mysql
         - ${MARIADB_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+        - ../share/:/var/share
       ports:
         - "${MARIADB_PORT}:3306"
       environment:
