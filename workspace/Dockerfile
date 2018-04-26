@@ -661,7 +661,6 @@ RUN if [ ${INSTALL_RUBY} = true ]; then \
   && ./configure \
   && make \
   && make install \
-
   && gem install compass \
 ;fi
 
