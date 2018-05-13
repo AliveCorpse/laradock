@@ -17,6 +17,19 @@ RUN apk update \
     && apk add --no-cache bash \
     && adduser -D -H -u 1000 -s /bin/bash www-data
 
+# install openssl
+RUN apk add --no-cache openssl
+
+# create a folder for the keys
+RUN mkdir /etc/nginx/ssl 2> /dev/null
+
+ARG LOCALDOMAIN=mabany.loc
+
+# generate the keys for your local domain
+RUN openssl genrsa -out "/etc/nginx/ssl/${LOCALDOMAIN}.key" 2048 \
+    && openssl req -new -key "/etc/nginx/ssl/${LOCALDOMAIN}.key" -out "/etc/nginx/ssl/${LOCALDOMAIN}.csr" -subj "/CN=${LOCALDOMAIN}/O=YOURCOMPANYNAME/C=UK" \
+    && openssl x509 -req -days 365 -in "/etc/nginx/ssl/${LOCALDOMAIN}.csr" -signkey "/etc/nginx/ssl/${LOCALDOMAIN}.key" -out "/etc/nginx/ssl/${LOCALDOMAIN}.crt"
+
 ARG PHP_UPSTREAM_CONTAINER=php-fpm
 ARG PHP_UPSTREAM_PORT=9000
 
