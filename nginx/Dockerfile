@@ -30,13 +30,6 @@ RUN openssl genrsa -out "/etc/nginx/ssl/${LOCALDOMAIN}.key" 2048 \
     && openssl req -new -key "/etc/nginx/ssl/${LOCALDOMAIN}.key" -out "/etc/nginx/ssl/${LOCALDOMAIN}.csr" -subj "/CN=${LOCALDOMAIN}/O=AMgrade/C=UK" \
     && openssl x509 -req -days 365 -in "/etc/nginx/ssl/${LOCALDOMAIN}.csr" -signkey "/etc/nginx/ssl/${LOCALDOMAIN}.key" -out "/etc/nginx/ssl/${LOCALDOMAIN}.crt"
 
-ARG LOCALDOMAIN=minifier.loc
-
-# generate the keys for your local domain
-RUN openssl genrsa -out "/etc/nginx/ssl/${LOCALDOMAIN}.key" 2048 \
-    && openssl req -new -key "/etc/nginx/ssl/${LOCALDOMAIN}.key" -out "/etc/nginx/ssl/${LOCALDOMAIN}.csr" -subj "/CN=${LOCALDOMAIN}/O=AMgrade/C=UK" \
-    && openssl x509 -req -days 365 -in "/etc/nginx/ssl/${LOCALDOMAIN}.csr" -signkey "/etc/nginx/ssl/${LOCALDOMAIN}.key" -out "/etc/nginx/ssl/${LOCALDOMAIN}.crt"
-
 ARG PHP_UPSTREAM_CONTAINER=php-fpm
 ARG PHP_UPSTREAM_PORT=9000
 
