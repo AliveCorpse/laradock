@@ -385,6 +385,7 @@ services:
         - "${MONGODB_PORT}:27017"
       volumes:
         - ${DATA_PATH_HOST}/mongo:/data/db
+        - ../share/:/var/share
       networks:
         - backend
 
