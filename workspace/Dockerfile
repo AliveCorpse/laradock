@@ -838,6 +838,8 @@ RUN if [ ${INSTALL_OH_MY_ZSH_SHELL} = true ]; then \
         /home/laradock/.oh-my-zsh/plugins/laravel-artisan \
     && git clone https://github.com/lukechilds/zsh-nvm \
         /home/laradock/.oh-my-zsh/custom/plugins/zsh-nvm \
+    && git clone https://github.com/zsh-users/zsh-autosuggestions \
+        /home/laradock/.oh-my-zsh/custom/plugins/zsh-autosuggestions \
 ;fi
 
 COPY .zshrc /home/laradock/.zshrc
