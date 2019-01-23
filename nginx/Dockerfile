@@ -23,7 +23,7 @@ RUN apk add --no-cache openssl
 # create a folder for the keys
 RUN mkdir /etc/nginx/ssl 2> /dev/null
 
-ARG LOCALDOMAIN=mabany.loc
+ARG LOCALDOMAIN=salsation.loc
 
 # generate the keys for your local domain
 RUN openssl genrsa -out "/etc/nginx/ssl/${LOCALDOMAIN}.key" 2048 \
