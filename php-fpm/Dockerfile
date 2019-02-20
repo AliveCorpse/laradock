@@ -38,6 +38,13 @@ RUN apt-get update -yqq && \
 # to add more Software's or remove existing one, you need to edit the
 # base image (https://github.com/Laradock/php-fpm).
 #
+# next lines are here becase there is no auto build on dockerhub see https://github.com/laradock/laradock/pull/1903#issuecomment-463142846
+USER root
+
+RUN apt-get install libzip-dev zip unzip -y && \
+    docker-php-ext-configure zip --with-libzip && \
+    # Install the zip extension
+    docker-php-ext-install zip
 
 #
 #--------------------------------------------------------------------------
@@ -47,7 +54,7 @@ RUN apt-get update -yqq && \
 # Optional Software's will only be installed if you set them to `true`
 # in the `docker-compose.yml` before the build.
 # Example:
-#   - INSTALL_ZIP_ARCHIVE=true
+#   - INSTALL_SOAP=true
 #
 
 ###########################################################################
@@ -90,6 +97,18 @@ RUN if [ ${INSTALL_SOAP} = true ]; then \
     rm /etc/apt/preferences.d/no-debian-php && \
     apt-get -y install libxml2-dev php-soap && \
     docker-php-ext-install soap \
+;fi
+
+###########################################################################
+# XSL:
+###########################################################################
+
+ARG INSTALL_XSL=false
+
+RUN if [ ${INSTALL_XSL} = true ]; then \
+    # Install the xsl extension
+    apt-get -y install libxslt-dev && \
+    docker-php-ext-install xsl \
 ;fi
 
 ###########################################################################
@@ -221,25 +240,21 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
 ARG INSTALL_AMQP=false
 
 RUN if [ ${INSTALL_AMQP} = true ]; then \
-    apt-get install librabbitmq-dev -y && \
+    # download and install manually, to make sure it's compatible with ampq installed by pecl later
+    # install cmake first
+    apt-get update && apt-get -y install cmake && \
+    curl -L -o /tmp/rabbitmq-c.tar.gz https://github.com/alanxz/rabbitmq-c/archive/master.tar.gz && \
+    mkdir -p rabbitmq-c && \
+    tar -C rabbitmq-c -zxvf /tmp/rabbitmq-c.tar.gz --strip 1 && \
+    cd rabbitmq-c/ && \
+    mkdir _build && cd _build/ && \
+    cmake .. && \
+    cmake --build . --target install && \
     # Install the amqp extension
     pecl install amqp && \
     docker-php-ext-enable amqp && \
     # Install the sockets extension
     docker-php-ext-install sockets \
-;fi
-
-###########################################################################
-# ZipArchive:
-###########################################################################
-
-ARG INSTALL_ZIP_ARCHIVE=false
-
-RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
-    apt-get install libzip-dev -y && \
-    docker-php-ext-configure zip --with-libzip && \
-    # Install the zip extension
-    docker-php-ext-install zip \
 ;fi
 
 ###########################################################################
@@ -550,7 +565,11 @@ RUN if [ $INSTALL_PHALCON = true ]; then \
 ARG INSTALL_APCU=false
 
 RUN if [ ${INSTALL_APCU} = true ]; then \
-    pecl install apcu && \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+        pecl install -a apcu-4.0.11; \
+    else \
+        pecl install apcu; \
+    fi && \
     docker-php-ext-enable apcu \
 ;fi
 
@@ -564,8 +583,28 @@ ARG INSTALL_YAML=false
 
 RUN if [ ${INSTALL_YAML} = true ]; then \
     apt-get install libyaml-dev -y ; \
-    pecl install yaml ; \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+        pecl install -a yaml-1.3.2; \
+    else \
+        pecl install yaml; \
+    fi && \
     docker-php-ext-enable yaml \
+;fi
+
+###########################################################################
+# Install additional locales:
+###########################################################################
+
+ARG INSTALL_ADDITIONAL_LOCALES=false
+ARG ADDITIONAL_LOCALES
+
+RUN if [ ${INSTALL_ADDITIONAL_LOCALES} = true ]; then \
+    apt-get install -y locales \
+    && echo '' >> /usr/share/locale/locale.alias \
+    && temp="${ADDITIONAL_LOCALES%\"}" \
+    && temp="${temp#\"}" \
+    && for i in ${temp}; do sed -i "/$i/s/^#//g" /etc/locale.gen; done \
+    && locale-gen \
 ;fi
 
 ###########################################################################
